@@ -10,7 +10,7 @@ class RN_Translator_Node():
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "api_baseurl": ("STRING", {"multiline": True, "default": "https://api.openai.com/v1"}),
+                "api_baseurl": ("STRING", {"default": "https://api.openai.com/v1"}),
                 "api_key": ("STRING", {"default": ""}),
                 "model": ("STRING", {"default": "gpt-3.5-turbo"}),
                 "source_text": ("STRING", {"multiline": True, "default": "请输入要翻译的文本"}),
@@ -19,9 +19,7 @@ class RN_Translator_Node():
                 "translation_style": (["标准", "正式", "口语化", "学术", "商务"], {"default": "标准"}),
                 "temperature": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 2.0, "step": 0.1}),
             },
-            "optional": {
-                "system_prompt": ("STRING", {"multiline": True, "default": "你是一个专业的翻译助手，能够准确地将文本从一种语言翻译成另一种语言。"}),
-            }
+            "optional": {}
         }
 
     RETURN_TYPES = ("STRING", "STRING")
