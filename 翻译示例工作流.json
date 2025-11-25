@@ -1,123 +1,57 @@
 {
-	"last_link_id": 2,
-	"nodes": [
-		{
-			"mode": 0,
-			"outputs": [
-				{
-					"shape": 3,
-					"name": "翻译结果",
-					"slot_index": 0,
-					"links": [
-						2
-					],
-					"label": "翻译结果",
-					"type": "STRING"
-				},
-				{
-					"shape": 3,
-					"name": "原始文本",
-					"slot_index": 1,
-					"links": [],
-					"label": "原始文本",
-					"type": "STRING"
-				}
-			],
-			"size": {
-				"0": 400,
-				"1": 500
-			},
-			"pos": [
-				300,
-				200
-			],
-			"widgets_values": [
-				"https://api.openai.com/v1",
-				"",
-				"gpt-3.5-turbo",
-				"Hello, how are you today?\nI'm fine, thank you!",
-				"英文",
-				"中文",
-				"标准",
-				0.3,
-				"你是一个专业的翻译助手，能够准确地将文本从一种语言翻译成另一种语言。"
-			],
-			"inputs": [],
-			"flags": {},
-			"id": 1,
-			"type": "RN_Translator_Node",
-			"properties": {
-				"Node name for S&R": "RN_Translator_Node"
-			},
-			"order": 0
-		},
-		{
-			"mode": 0,
-			"outputs": [
-				{
-					"shape": 6,
-					"name": "STRING",
-					"label": "STRING",
-					"type": "STRING"
-				}
-			],
-			"size": [
-				405.9541276073287,
-				380.66760093760433
-			],
-			"pos": [
-				750,
-				200
-			],
-			"widgets_values": [
-				"",
-				"你好，你今天怎么样？\n我很好，谢谢！"
-			],
-			"inputs": [
-				{
-					"widget": {
-						"name": "text"
-					},
-					"name": "text",
-					"link": 2,
-					"type": "STRING"
-				}
-			],
-			"flags": {},
-			"id": 2,
-			"type": "ShowText|pysssss",
-			"properties": {
-				"Node name for S&R": "ShowText|pysssss"
-			},
-			"order": 1
-		}
-	],
-	"extra": {
-		"0246.VERSION": [
-			0,
-			0,
-			4
-		],
-		"ds": {
-			"offset": {
-				"0": 0,
-				"1": 0
-			},
-			"scale": 1.0
-		}
-	},
-	"groups": [],
-	"links": [
-		[
-			2,
-			1,
-			0,
-			2,
-			0,
-			"STRING"
-		]
-	],
-	"config": {},
-	"version": 0.4,
-	"last_node_id": 2
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "RN_Translator_Node",
+      "pos": [300, 200],
+      "size": [400, 420],
+      "order": 0,
+      "mode": 0,
+      "flags": {},
+      "properties": {"Node name for S&R": "RN_Translator_Node"},
+      "outputs": [
+        {"name": "翻译结果", "type": "STRING", "label": "翻译结果", "shape": 3, "slot_index": 0, "links": [2]}
+      ],
+      "inputs": [],
+      "widgets_values": [
+        "Hello, how are you today?\nI'm fine, thank you!",
+        "英文",
+        "中文",
+        "标准",
+        0.3,
+        "https://api.openai.com/v1",
+        "",
+        "gpt-4o-mini"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "ShowText|pysssss",
+      "pos": [750, 200],
+      "size": [405.95, 300.0],
+      "order": 1,
+      "mode": 0,
+      "flags": {},
+      "properties": {"Node name for S&R": "ShowText|pysssss"},
+      "outputs": [
+        {"name": "STRING", "type": "STRING", "label": "STRING", "shape": 6}
+      ],
+      "inputs": [
+        {"name": "text", "type": "STRING", "link": 2, "widget": {"name": "text"}}
+      ],
+      "widgets_values": ["", ""]
+    }
+  ],
+  "links": [
+    [2, 1, 0, 2, 0, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "version": 0.4,
+  "last_node_id": 2,
+  "extra": {
+    "0246.VERSION": [0, 0, 4],
+    "ds": {"offset": [0, 0], "scale": 1.0}
+  }
 }
