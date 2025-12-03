@@ -8,6 +8,21 @@ class RN_Translator_Node():
     def __init__(self):
         pass
 
+    def _load_llm_config(self):
+        cfg_path = os.path.join(os.path.dirname(__file__), "config", "comfyui_rn_translator-config.json")
+        if not os.path.exists(cfg_path):
+            return {}
+        try:
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            llm = data.get("llm") or {}
+            current = llm.get("current_provider")
+            providers = llm.get("providers") or {}
+            provider_cfg = providers.get(current) or {}
+            return provider_cfg
+        except Exception:
+            return {}
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -33,6 +48,12 @@ class RN_Translator_Node():
 
     def _translate_impl(self, source_text, source_language, target_language, translation_style, temperature,
                         input_text=None, apiBaseUrl=None, apiKey=None, model=None, system_prompt=None):
+        if apiBaseUrl == "default":
+            apiBaseUrl = ""
+        if apiKey == "default":
+            apiKey = ""
+        if model == "default":
+            model = ""
         env_api_baseurl = (
                 os.environ.get("LLM_API_BASEURL")
                 or os.environ.get("OPENAI_BASE_URL")
@@ -50,13 +71,21 @@ class RN_Translator_Node():
                 or os.environ.get("DEEPSEEK_MODEL")
         )
 
+        cfg = self._load_llm_config()
+        cfg_base_url = cfg.get("base_url")
+        cfg_api_key = cfg.get("api_key")
+        cfg_model = cfg.get("model")
+        cfg_temperature = cfg.get("temperature")
+        cfg_max_tokens = cfg.get("max_tokens")
+        cfg_top_p = cfg.get("top_p")
+
         used_api_baseurl = None
         used_api_key = None
         used_model = None
 
-        used_api_baseurl = (apiBaseUrl or env_api_baseurl or "https://api.openai.com/v1")
-        used_model = (model or env_model or "gpt-4o-mini")
-        used_api_key = (apiKey or env_api_key or "")
+        used_api_baseurl = (apiBaseUrl or env_api_baseurl or cfg_base_url or "https://api.openai.com/v1")
+        used_model = (model or env_model or cfg_model or "gpt-4o-mini")
+        used_api_key = (apiKey or env_api_key or cfg_api_key or "")
         if not used_api_key:
             return ("错误：请提供API密钥",)
 
@@ -107,12 +136,17 @@ class RN_Translator_Node():
                 {'role': 'user', 'content': user_prompt.strip()}
             ]
 
-            completion = client.chat.completions.create(
-                model=used_model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=4096
-            )
+            use_temperature = temperature if temperature is not None else (cfg_temperature if cfg_temperature is not None else 0.3)
+            use_max_tokens = cfg_max_tokens if cfg_max_tokens is not None else 4096
+            params = {
+                "model": used_model,
+                "messages": messages,
+                "temperature": use_temperature,
+                "max_tokens": use_max_tokens,
+            }
+            if cfg_top_p is not None:
+                params["top_p"] = cfg_top_p
+            completion = client.chat.completions.create(**params)
 
             if completion is not None and hasattr(completion, 'choices') and len(completion.choices) > 0:
                 translated_text = completion.choices[0].message.content.strip()
