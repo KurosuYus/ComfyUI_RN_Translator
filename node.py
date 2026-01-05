@@ -4,6 +4,15 @@ import json
 import os
 
 
+def _normalize_baseurl(u):
+    if not u:
+        return u
+    s = u.rstrip("/")
+    if s.endswith("/v1") or "/v1/" in s:
+        return s
+    return s + "/v1"
+
+
 class RN_Translator_Node():
     def __init__(self):
         pass
@@ -55,18 +64,30 @@ class RN_Translator_Node():
         if model == "default":
             model = ""
         env_api_baseurl = (
-                os.environ.get("LLM_API_BASEURL")
+                os.environ.get("COMFYUI_RN_BASE_URL")
+                or os.environ.get("COMFLY_BASE_URL")
+                or os.environ.get("RUNNODE_BASE_URL")
+                or os.environ.get("RN_BASE_URL")
+                or os.environ.get("LLM_API_BASEURL")
                 or os.environ.get("OPENAI_BASE_URL")
                 or os.environ.get("OPENAI_API_BASE_URL")
                 or os.environ.get("DEEPSEEK_API_BASE_URL")
         )
         env_api_key = (
-                os.environ.get("LLM_API_KEY")
+                os.environ.get("COMFYUI_RN_API_KEY")
+                or os.environ.get("COMFLY_API_KEY")
+                or os.environ.get("RUNNODE_API_KEY")
+                or os.environ.get("RN_API_KEY")
+                or os.environ.get("LLM_API_KEY")
                 or os.environ.get("OPENAI_API_KEY")
                 or os.environ.get("DEEPSEEK_API_KEY")
         )
         env_model = (
-                os.environ.get("LLM_MODEL")
+                os.environ.get("COMFYUI_RN_MODEL")
+                or os.environ.get("COMFLY_MODEL")
+                or os.environ.get("RUNNODE_MODEL")
+                or os.environ.get("RN_MODEL")
+                or os.environ.get("LLM_MODEL")
                 or os.environ.get("OPENAI_MODEL")
                 or os.environ.get("DEEPSEEK_MODEL")
         )
@@ -84,6 +105,7 @@ class RN_Translator_Node():
         used_model = None
 
         used_api_baseurl = (apiBaseUrl or env_api_baseurl or cfg_base_url or "https://api.openai.com/v1")
+        used_api_baseurl = _normalize_baseurl(used_api_baseurl)
         used_model = (model or env_model or cfg_model or "gpt-4o-mini")
         used_api_key = (apiKey or env_api_key or cfg_api_key or "")
         if not used_api_key:
