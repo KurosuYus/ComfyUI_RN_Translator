@@ -1,0 +1,9 @@
+[project]
+name = "comfyui-rn-translator"
+description = "RunNode translator nodes for ComfyUI"
+version = "1.0"
+
+[tool.comfy]
+PublisherId = "SF-Runnode"
+DisplayName = "RunNode Translator"
+Icon = ""

@@ -2,6 +2,7 @@ from openai import OpenAI
 import time
 import json
 import os
+from .utils import generate_request_id, log_prepare, log_complete, log_error, ProgressBar
 
 
 def _normalize_baseurl(u):
@@ -57,12 +58,11 @@ class RN_Translator_Node():
 
     def _translate_impl(self, source_text, source_language, target_language, translation_style, temperature,
                         input_text=None, apiBaseUrl=None, apiKey=None, model=None, system_prompt=None):
-        if apiBaseUrl == "default":
-            apiBaseUrl = ""
-        if apiKey == "default":
-            apiKey = ""
-        if model == "default":
-            model = ""
+        # 处理输入回退逻辑：只有当输入不为空（且不全是空格）时才使用输入值
+        apiBaseUrl = apiBaseUrl if apiBaseUrl and apiBaseUrl.strip() and apiBaseUrl != "default" else None
+        apiKey = apiKey if apiKey and apiKey.strip() and apiKey != "default" else None
+        model = model if model and model.strip() and model != "default" else None
+
         env_api_baseurl = (
                 os.environ.get("COMFYUI_RN_BASE_URL")
                 or os.environ.get("COMFLY_BASE_URL")
@@ -104,10 +104,10 @@ class RN_Translator_Node():
         used_api_key = None
         used_model = None
 
-        used_api_baseurl = (apiBaseUrl or env_api_baseurl or cfg_base_url or "https://api.openai.com/v1")
+        used_api_baseurl = (apiBaseUrl or os.environ.get("COMFYUI_RN_BASE_URL") or env_api_baseurl or cfg_base_url or "https://api.openai.com/v1")
         used_api_baseurl = _normalize_baseurl(used_api_baseurl)
         used_model = (model or env_model or cfg_model or "gpt-4o-mini")
-        used_api_key = (apiKey or env_api_key or cfg_api_key or "")
+        used_api_key = (apiKey or os.environ.get("COMFYUI_RN_API_KEY") or env_api_key or cfg_api_key or "")
         if not used_api_key:
             return ("错误：请提供API密钥",)
 
@@ -185,9 +185,19 @@ class RN_Translator_Node():
 
     def translate_text(self, source_text, source_language, target_language, translation_style, temperature,
                        input_text=None, apiBaseUrl="", apiKey="", model=""):
-        return self._translate_impl(source_text, source_language, target_language, translation_style,
-                                    temperature, input_text=input_text,
-                                    apiBaseUrl=apiBaseUrl, apiKey=apiKey, model=model)
+        request_id = generate_request_id("translate", "translator")
+        log_prepare("文本翻译", request_id, "RunNode/Translator-", "Translator")
+        rn_pbar = ProgressBar(request_id, "Translator", streaming=True, task_type="文本翻译", source="RunNode/Translator-")
+        result = self._translate_impl(source_text, source_language, target_language, translation_style,
+                                      temperature, input_text=input_text,
+                                      apiBaseUrl=apiBaseUrl, apiKey=apiKey, model=model)
+        if result and isinstance(result, tuple):
+            txt = result[0] if len(result) > 0 else ""
+            if txt.startswith("错误：") or txt.startswith("Error") or txt.startswith("翻译错误"):
+                rn_pbar.error(txt)
+            else:
+                rn_pbar.done(char_count=len(txt))
+        return result
 
     @classmethod
     def IS_CHANGED(cls, **kwargs):
